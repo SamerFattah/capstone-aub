@@ -1,0 +1,13 @@
+streamlit
+st-on-hover-tabs
+streamlit-option-menu
+pillow
+jsonschema
+requests
+cloudpickle
+streamlit-extras
+pandas
+numpy
+plotly
+matplotlib
+scikit-learn
