@@ -16,7 +16,6 @@ from streamlit_extras.metric_cards import style_metric_cards
 #data exploration
 import pandas as pd
 import numpy as np
-from bs4 import BeautifulSoup as bs
 import re
 import plotly.express as px
 import plotly.graph_objects as go
@@ -359,67 +358,94 @@ if tabs == 'Data Exploration':
     )
   st.plotly_chart(fig12, use_container_width=True)
 
-if tabs == 'Predictive Model':
-    # Load data
-    df_jobs = pd.read_csv('job_numbers_23.csv')
-    df_2023['Week End'] = pd.to_datetime(df_2023['Week End'], errors='coerce')
-    df_2023['Week'] = df_2023['Week End'].dt.day_of_week
-    df_2023['Month'] = df_2023['Week End'].dt.strftime('%B')
-    month_order = ['January', 'February', 'March', 'April', 'May', 'June',
-               'July', 'August', 'September', 'October', 'November', 'December']
-    df_2023['Month'] = pd.Categorical(df_2023['Month'], categories=month_order, ordered=True)
-    df_2023 = df_2023.sort_values(by='Month')
-    df_projects = df_2023.copy()
+
+# Load data
+df_jobs = pd.read_csv('job_numbers_23.csv')
     
-    # Step 1: Merge the DataFrames on 'Job Numbers' and 'Job'
-    df_jobs['Job Numbers'] = df_jobs['Job Numbers'].astype(str)
-    df_projects['Job'] = df_projects['Job'].astype(str)
-    projects_23 = pd.merge(df_jobs, df_projects, left_on='Job Numbers', right_on='Job', how='inner').drop_duplicates()
-    
-    # Selecting a subset of relevant features for the prediction
-    relevant_columns = ['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers',
-                        'Duration of Work (Weeks)', 'Designation', 'Month', 'Reg Hrs']
-    projects_23 = projects_23[relevant_columns].dropna()  # Drop rows with missing values in selected columns
-    projects_23['Designation'] = projects_23['Designation'].str.lower()
-    
-    # Load the pre-trained model
-    with open("random_forest_model.pkl", "rb") as f:
-        rf_model = cloudpickle.load(f)
-    
+# Data preprocessing
+df_2023['Week End'] = pd.to_datetime(df_2023['Week End'], errors='coerce')
+df_2023['Week'] = df_2023['Week End'].dt.day_of_week
+df_2023['Month'] = df_2023['Week End'].dt.strftime('%B')
+month_order = ['January', 'February', 'March', 'April', 'May', 'June',
+                   'July', 'August', 'September', 'October', 'November', 'December']
+df_2023['Month'] = pd.Categorical(df_2023['Month'], categories=month_order, ordered=True)
+df_2023 = df_2023.sort_values(by='Month')
+df_projects = df_2023.copy()
+
+# Merge DataFrames
+df_jobs['Job Numbers'] = df_jobs['Job Numbers'].astype(str)
+df_projects['Job'] = df_projects['Job'].astype(str)
+projects_23 = pd.merge(df_jobs, df_projects, left_on='Job Numbers', right_on='Job', how='inner').drop_duplicates()
+
+ # Select relevant columns
+relevant_columns = [
+        'Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers',
+        'Duration of Work (Weeks)', 'Designation', 'Month', 'Reg Hrs'
+    ]
+projects_23 = projects_23[relevant_columns].dropna()
+projects_23['Designation'] = projects_23['Designation'].str.lower()
+
     # Label encode categorical features
-    label_encoders = {}
-    for column in ['Designation', 'Month', 'Job Numbers']:
+label_encoders = {}
+for column in ['Designation', 'Month', 'Job Numbers']:
         le = LabelEncoder()
         projects_23[column] = le.fit_transform(projects_23[column].astype(str))
-        label_encoders[column] = le  # Save encoders for later reverse transformation
-    
-    # Streamlit App
+        label_encoders[column] = le
+
+# Function to train the model (cached to avoid retraining)
+@st.cache_data
+def train_model(X, y, n_estimators, test_size):
+    # Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+
+    # Train Random Forest model
+    rf_model = RandomForestRegressor(
+        n_estimators=n_estimators,
+        max_depth=None,
+        min_samples_split=5,
+        min_samples_leaf=1,
+        random_state=42
+    )
+    rf_model.fit(X_train, y_train)
+
+    return rf_model
+
+if tabs == 'Predictive Model':
+
+    # Define features and target
+    X = projects_23[['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers',
+                     'Duration of Work (Weeks)', 'Designation', 'Month']]
+    y = projects_23['Reg Hrs']
+
+    # Train the model
+    rf_model = train_model(X, y, 200, 0.2)
+    st.write("### Model Trained Successfully")
+
+    # Streamlit app for prediction
     st.title("Predict Regular Hours")
     st.sidebar.header("Input Features")
-    
+
     # Sliders for numerical inputs
     area = st.sidebar.slider("Area (Ha)", min_value=50, max_value=500, step=10)
     num_services = st.sidebar.slider("Number of Services", min_value=5, max_value=10, step=1)
     num_tender_packages = st.sidebar.slider("Number of Tender Packages", min_value=1, max_value=12, step=1)
     duration_weeks = st.sidebar.slider("Duration of Work (Weeks)", min_value=10, max_value=200, step=5)
-    
-    # Reverse label encoding for dropdown options
-    designation_options = label_encoders['Designation'].inverse_transform(projects_23['Designation'].unique())
-    job_number_options = label_encoders['Job Numbers'].inverse_transform(projects_23['Job Numbers'].unique())
-    month_options = label_encoders['Month'].inverse_transform(projects_23['Month'].unique())
-    
-    # Selectboxes for categorical inputs
+
+    # Dropdowns for categorical inputs
+    designation_options = label_encoders['Designation'].inverse_transform(range(len(label_encoders['Designation'].classes_)))
+    job_number_options = label_encoders['Job Numbers'].inverse_transform(range(len(label_encoders['Job Numbers'].classes_)))
+    month_options = label_encoders['Month'].inverse_transform(range(len(label_encoders['Month'].classes_)))
+
     designation = st.sidebar.selectbox("Designation", options=designation_options)
     job_number = st.sidebar.selectbox("Job Numbers", options=job_number_options)
-    month_options = df_2023['Month'].cat.categories  # Extract ordered categories
     month = st.sidebar.selectbox("Month", options=month_options)
 
-    # Encode user-selected categorical inputs for prediction
+    # Encode user input
     encoded_designation = label_encoders['Designation'].transform([designation])[0]
     encoded_job_number = label_encoders['Job Numbers'].transform([job_number])[0]
     encoded_month = label_encoders['Month'].transform([month])[0]
-    
-    # Prepare user input as a DataFrame for prediction
+
+    # Prepare input data for prediction
     user_input = pd.DataFrame({
         'Area (Ha)': [area],
         'Number of Services': [num_services],
@@ -429,9 +455,8 @@ if tabs == 'Predictive Model':
         'Designation': [encoded_designation],
         'Month': [encoded_month]
     })
-    
+
     # Make prediction
     if st.button("Predict"):
         prediction = rf_model.predict(user_input)
-        st.write("### Predicted Regular Hours:")
-        st.write(f"{prediction[0]:.0f}")
+        st.write(f"### Predicted Regular Hours: {prediction[0]:.2f}")
