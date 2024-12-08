@@ -244,7 +244,10 @@ if tabs == 'Data Exploration':
                      y=top_positions_ot_hours.sort_values(by='OT Hrs', ascending=True)['Designation'],
                      orientation='h',
                      text=top_positions_ot_hours.sort_values(by='OT Hrs', ascending=True)['OT Hrs'],
-                     textposition='inside'))
+                     textposition='inside',
+    insidetextanchor='middle',  # Center the text within the bar
+    textangle=0,))
+
 
   fig2.update_layout(title={'text': f'Top Positions by Overtime Hours',
             'x': 0.5, # Center the title horizontally
@@ -434,11 +437,10 @@ if tabs == 'Predictive Model':
     # Dropdowns for categorical inputs
     designation_options = label_encoders['Designation'].inverse_transform(range(len(label_encoders['Designation'].classes_)))
     job_number_options = label_encoders['Job Numbers'].inverse_transform(range(len(label_encoders['Job Numbers'].classes_)))
-    month_options = label_encoders['Month'].inverse_transform(range(len(label_encoders['Month'].classes_)))
 
     designation = st.sidebar.selectbox("Designation", options=designation_options)
     job_number = st.sidebar.selectbox("Job Numbers", options=job_number_options)
-    month = st.sidebar.selectbox("Month", options=month_options)
+    month = st.sidebar.selectbox("Month", options=month_order)
 
     # Encode user input
     encoded_designation = label_encoders['Designation'].transform([designation])[0]
