@@ -458,4 +458,4 @@ if tabs == 'Predictive Model':
             prediction = rf_model.predict(user_input)
             st.write(f"### Predicted Regular Hours: {prediction[0]:.2f}")
     except Exception as e:
-        st.error(f"An error occurred during prediction: {e}"
+        st.error(f"An error occurred during prediction: {e}")
