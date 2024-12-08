@@ -411,6 +411,7 @@ def train_model(X, y, n_estimators, test_size):
     return rf_model
 
 if tabs == 'Predictive Model':
+
     # Define features and target
     X = projects_23[['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers',
                      'Duration of Work (Weeks)', 'Designation', 'Month']]
@@ -431,31 +432,30 @@ if tabs == 'Predictive Model':
     duration_weeks = st.sidebar.slider("Duration of Work (Weeks)", min_value=10, max_value=200, step=5)
 
     # Dropdowns for categorical inputs
-    designation_options = projects_23['Designation'].unique()
-    job_number_options = projects_23['Job Numbers'].unique()
+    designation_options = label_encoders['Designation'].inverse_transform(range(len(label_encoders['Designation'].classes_)))
+    job_number_options = label_encoders['Job Numbers'].inverse_transform(range(len(label_encoders['Job Numbers'].classes_)))
 
     designation = st.sidebar.selectbox("Designation", options=designation_options)
     job_number = st.sidebar.selectbox("Job Numbers", options=job_number_options)
-    month = st.sidebar.selectbox("Month", options=month_order)  # Use the predefined `month_order`
+    month = st.sidebar.selectbox("Month", options=month_order)
 
-    # Map selected month to its index (0 for January, 1 for February, etc.)
-    encoded_month = month_order.index(month)
+    # Encode user input
+    encoded_designation = label_encoders['Designation'].transform([designation])[0]
+    encoded_job_number = label_encoders['Job Numbers'].transform([job_number])[0]
+    encoded_month = label_encoders['Month'].transform([month])[0]
 
     # Prepare input data for prediction
     user_input = pd.DataFrame({
         'Area (Ha)': [area],
         'Number of Services': [num_services],
         'Number of tender Packages': [num_tender_packages],
-        'Job Numbers': [job_number],
+        'Job Numbers': [encoded_job_number],
         'Duration of Work (Weeks)': [duration_weeks],
-        'Designation': [designation],
+        'Designation': [encoded_designation],
         'Month': [encoded_month]
     })
 
     # Make prediction
-    try:
-        if st.button("Predict"):
-            prediction = rf_model.predict(user_input)
-            st.write(f"### Predicted Regular Hours: {prediction[0]:.2f}")
-    except Exception as e:
-        st.error(f"An error occurred during prediction: {e}")
+    if st.button("Predict"):
+        prediction = rf_model.predict(user_input)
+        st.write(f"### Predicted Regular Hours: {prediction[0]:.2f}")
