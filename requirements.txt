@@ -1,11 +1,12 @@
 Pillow==10.1.0
-numpy==1.23.0
+numpy==1.24.3  # Adjusted to a more recent compatible version
 pandas==2.2.1
 scikit-learn==1.5.2
 streamlit==1.40.2
 st-on-hover-tabs==0.1.1
 streamlit-option-menu==0.3.2
-matplotlib==3.3.4
+matplotlib==3.7.2  # Upgraded for Python 3.12 compatibility
 cloudpickle==2.2.0
 plotly==5.13.0
+
 
