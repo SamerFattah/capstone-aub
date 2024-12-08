@@ -1,5 +1,4 @@
 import streamlit as st
-from st_on_hover_tabs import on_hover_tabs
 from streamlit_option_menu import option_menu 
 
 
