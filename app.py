@@ -412,6 +412,7 @@ def train_model(X, y, n_estimators=200, test_size=0.2):
     return rf_model
 
 # Streamlit Predictive Model Tab
+# Streamlit Predictive Model Tab
 if tabs == 'Predictive Model':
     st.title("Predict Regular Hours")
     st.sidebar.header("Input Features")
@@ -421,41 +422,52 @@ if tabs == 'Predictive Model':
                      'Duration of Work (Weeks)', 'Designation', 'Month']]
     y = projects_23['Reg Hrs']
 
-    # Train the model once and cache it
-    rf_model = train_model(X, y)
-    st.success("Model is ready for predictions!")
+    # Initialize the session state for the model
+    if "rf_model" not in st.session_state:
+        st.session_state["rf_model"] = None
 
-    # Sliders for numerical inputs
-    area = st.sidebar.slider("Area (Ha)", min_value=50, max_value=500, step=10)
-    num_services = st.sidebar.slider("Number of Services", min_value=5, max_value=10, step=1)
-    num_tender_packages = st.sidebar.slider("Number of Tender Packages", min_value=1, max_value=12, step=1)
-    duration_weeks = st.sidebar.slider("Duration of Work (Weeks)", min_value=10, max_value=200, step=5)
+    # Train Model Button
+    if st.button("Train Model"):
+        with st.spinner("Training model..."):
+            st.session_state["rf_model"] = train_model(X, y, n_estimators=100, test_size=0.2)  # Reduced n_estimators
+        st.success("Model trained successfully!")
 
-    # Dropdowns for categorical inputs
-    designation_options = label_encoders['Designation'].inverse_transform(range(len(label_encoders['Designation'].classes_)))
-    job_number_options = label_encoders['Job Numbers'].inverse_transform(range(len(label_encoders['Job Numbers'].classes_)))
+    # Ensure model is trained before allowing predictions
+    if st.session_state["rf_model"] is not None:
+        # Sliders for numerical inputs
+        area = st.sidebar.slider("Area (Ha)", min_value=50, max_value=500, step=10)
+        num_services = st.sidebar.slider("Number of Services", min_value=5, max_value=10, step=1)
+        num_tender_packages = st.sidebar.slider("Number of Tender Packages", min_value=1, max_value=12, step=1)
+        duration_weeks = st.sidebar.slider("Duration of Work (Weeks)", min_value=10, max_value=200, step=5)
 
-    designation = st.sidebar.selectbox("Designation", options=designation_options)
-    job_number = st.sidebar.selectbox("Job Numbers", options=job_number_options)
-    month = st.sidebar.selectbox("Month", options=month_order)
+        # Dropdowns for categorical inputs
+        designation_options = label_encoders['Designation'].inverse_transform(range(len(label_encoders['Designation'].classes_)))
+        job_number_options = label_encoders['Job Numbers'].inverse_transform(range(len(label_encoders['Job Numbers'].classes_)))
 
-    # Encode user inputs
-    encoded_designation = label_encoders['Designation'].transform([designation])[0]
-    encoded_job_number = label_encoders['Job Numbers'].transform([job_number])[0]
-    encoded_month = month_order.index(month)  # Use predefined order for months
+        designation = st.sidebar.selectbox("Designation", options=designation_options)
+        job_number = st.sidebar.selectbox("Job Numbers", options=job_number_options)
+        month = st.sidebar.selectbox("Month", options=month_order)
 
-    # Prepare input data for prediction
-    user_input = pd.DataFrame({
-        'Area (Ha)': [area],
-        'Number of Services': [num_services],
-        'Number of tender Packages': [num_tender_packages],
-        'Job Numbers': [encoded_job_number],
-        'Duration of Work (Weeks)': [duration_weeks],
-        'Designation': [encoded_designation],
-        'Month': [encoded_month]
-    })
+        # Encode user inputs
+        encoded_designation = label_encoders['Designation'].transform([designation])[0]
+        encoded_job_number = label_encoders['Job Numbers'].transform([job_number])[0]
+        encoded_month = month_order.index(month)  # Use predefined order for months
 
-    # Make prediction
-    if st.button("Predict"):
-        prediction = rf_model.predict(user_input)
-        st.write(f"### Predicted Regular Hours: {prediction[0]:.2f}")
+        # Prepare input data for prediction
+        user_input = pd.DataFrame({
+            'Area (Ha)': [area],
+            'Number of Services': [num_services],
+            'Number of tender Packages': [num_tender_packages],
+            'Job Numbers': [encoded_job_number],
+            'Duration of Work (Weeks)': [duration_weeks],
+            'Designation': [encoded_designation],
+            'Month': [encoded_month]
+        })
+
+        # Predict Button
+        if st.button("Predict"):
+            prediction = st.session_state["rf_model"].predict(user_input)
+            st.write(f"### Predicted Regular Hours: {prediction[0]:.2f}")
+    else:
+        st.warning("Please train the model before making predictions.")
+
