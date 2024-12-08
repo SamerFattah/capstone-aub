@@ -10,8 +10,6 @@ import requests
 import random
 import cloudpickle
 
-from streamlit_extras.function_explorer import function_explorer
-from streamlit_extras.metric_cards import style_metric_cards
 #data exploration
 import pandas as pd
 import numpy as np
