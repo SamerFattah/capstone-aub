@@ -359,6 +359,9 @@ if tabs == 'Data Exploration':
   st.plotly_chart(fig12, use_container_width=True)
 
 
+# Define the order of months
+month_order = ['January', 'February', 'March', 'April', 'May', 'June',
+               'July', 'August', 'September', 'October', 'November', 'December']
 # # Load data
 df_jobs = pd.read_csv('job_numbers_23.csv')
 
