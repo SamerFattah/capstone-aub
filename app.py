@@ -518,4 +518,4 @@ if tabs == 'Predictive Table':
         # Display the table
         st.dataframe(output_table)
     else:
-#         st.warning("Please wait while the model is trained.")
+        st.warning("Please wait while the model is trained.")
