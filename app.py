@@ -441,82 +441,82 @@ df_jobs['Job Numbers'] = df_jobs['Job Numbers'].astype(str)
 df_projects = df_2023.copy()
 df_projects['Job'] = df_projects['Job'].astype(str)
 projects_23 = pd.merge(df_jobs, df_projects, left_on='Job Numbers', right_on='Job', how='inner').drop_duplicates()
-projects_23['Total Hrs'] = projects_23['Reg Hrs'] + projects_23['OT Hrs']
+st.dataframe(projects_23)
 
-# Select relevant columns
-relevant_columns = [
-   'Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers', 'Duration of Work (Weeks)', 'Designation', 'WBS'
-]
-projects_23 = projects_23[relevant_columns].dropna()
-projects_23['Designation'] = projects_23['Designation'].str.lower()
-projects_23['Total Hrs'] = projects_23['Reg Hrs'] + projects_23['OT Hrs']
+# # Select relevant columns
+# relevant_columns = [
+#    'Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers', 'Duration of Work (Weeks)', 'Designation', 'WBS'
+# ]
+# projects_23 = projects_23[relevant_columns].dropna()
+# projects_23['Designation'] = projects_23['Designation'].str.lower()
+# projects_23['Total Hrs'] = projects_23['Reg Hrs'] + projects_23['OT Hrs']
 
-# Cache encoded label encoders and preprocessing
-@st.cache_data
-def preprocess_data(data):
-    label_encoders = {}
-    for column in ['WBS','Number of tender Packages','Job Numbers','Designation']:
-        le = LabelEncoder()
-        data[column] = le.fit_transform(data[column].astype(str))
-        label_encoders[column] = le
-    return data, label_encoders
+# # Cache encoded label encoders and preprocessing
+# @st.cache_data
+# def preprocess_data(data):
+#     label_encoders = {}
+#     for column in ['WBS','Number of tender Packages','Job Numbers','Designation']:
+#         le = LabelEncoder()
+#         data[column] = le.fit_transform(data[column].astype(str))
+#         label_encoders[column] = le
+#     return data, label_encoders
 
-projects_23, label_encoders = preprocess_data(projects_23)
+# projects_23, label_encoders = preprocess_data(projects_23)
 
-# Cache the model training function
-@st.cache_data
-def train_model(X, y, n_estimators=200, test_size=0.2):
-    # Split data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
-    # Train Random Forest model
-    rf_model = RandomForestRegressor(
-        n_estimators=n_estimators,
-        max_depth=None,
-        min_samples_split=5,
-        min_samples_leaf=1,
-        random_state=42
-    )
-    rf_model.fit(X_train, y_train)
-    return rf_model, X_test, y_test
+# # Cache the model training function
+# @st.cache_data
+# def train_model(X, y, n_estimators=200, test_size=0.2):
+#     # Split data into training and testing sets
+#     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+#     # Train Random Forest model
+#     rf_model = RandomForestRegressor(
+#         n_estimators=n_estimators,
+#         max_depth=None,
+#         min_samples_split=5,
+#         min_samples_leaf=1,
+#         random_state=42
+#     )
+#     rf_model.fit(X_train, y_train)
+#     return rf_model, X_test, y_test
 
-# Streamlit Predictive Table Tab
-if tabs == 'Predictive Table':
-    st.title("Predicted Total Hours Table")
+# # Streamlit Predictive Table Tab
+# if tabs == 'Predictive Table':
+#     st.title("Predicted Total Hours Table")
 
-    # Define features and target
-    X = projects_23[['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers', 'Duration of Work (Weeks)', 'Designation', 'WBS']]
-    y = projects_23['Total Hrs']
+#     # Define features and target
+#     X = projects_23[['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers', 'Duration of Work (Weeks)', 'Designation', 'WBS']]
+#     y = projects_23['Total Hrs']
 
-    # Train the model and cache results
-    if "rf_model" not in st.session_state:
-        with st.spinner("Training model..."):
-            rf_model, X_test, y_test = train_model(X, y, n_estimators=100, test_size=0.2)
-            st.session_state["rf_model"] = rf_model
-            st.session_state["X_test"] = X_test
-            st.session_state["y_test"] = y_test
-        st.success("Model trained successfully!")
+#     # Train the model and cache results
+#     if "rf_model" not in st.session_state:
+#         with st.spinner("Training model..."):
+#             rf_model, X_test, y_test = train_model(X, y, n_estimators=100, test_size=0.2)
+#             st.session_state["rf_model"] = rf_model
+#             st.session_state["X_test"] = X_test
+#             st.session_state["y_test"] = y_test
+#         st.success("Model trained successfully!")
 
-    # Ensure model is trained before generating the table
-    if st.session_state.get("rf_model") is not None:
-        # Get test data and predictions
-        rf_model = st.session_state["rf_model"]
-        X_test = st.session_state["X_test"]
-        y_test = st.session_state["y_test"]
+#     # Ensure model is trained before generating the table
+#     if st.session_state.get("rf_model") is not None:
+#         # Get test data and predictions
+#         rf_model = st.session_state["rf_model"]
+#         X_test = st.session_state["X_test"]
+#         y_test = st.session_state["y_test"]
 
-        # Generate predictions
-        predictions = rf_model.predict(X_test)
+#         # Generate predictions
+#         predictions = rf_model.predict(X_test)
 
-        # Decode categorical columns for readability
-        decoded_X_test = X_test.copy()
-        for column in ['WBS', 'Number of tender Packages', 'Job Numbers', 'Designation']:
-            decoded_X_test[column] = label_encoders[column].inverse_transform(X_test[column])
+#         # Decode categorical columns for readability
+#         decoded_X_test = X_test.copy()
+#         for column in ['WBS', 'Number of tender Packages', 'Job Numbers', 'Designation']:
+#             decoded_X_test[column] = label_encoders[column].inverse_transform(X_test[column])
 
-        # Create the output table
-        output_table = decoded_X_test.copy()
-        output_table['Actual Total Hrs'] = y_test.values
-        output_table['Predicted Total Hrs'] = predictions.round(0)  # Round predictions to 0 decimals
+#         # Create the output table
+#         output_table = decoded_X_test.copy()
+#         output_table['Actual Total Hrs'] = y_test.values
+#         output_table['Predicted Total Hrs'] = predictions.round(0)  # Round predictions to 0 decimals
 
-        # Display the table
-        st.dataframe(output_table)
-    else:
-        st.warning("Please wait while the model is trained.")
+#         # Display the table
+#         st.dataframe(output_table)
+#     else:
+#         st.warning("Please wait while the model is trained.")
