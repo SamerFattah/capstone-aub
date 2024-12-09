@@ -348,126 +348,20 @@ if tabs == 'Data Exploration':
   st.plotly_chart(fig12, use_container_width=True)
 
 
-# Define the order of months
-month_order = ['January', 'February', 'March', 'April', 'May', 'June',
-               'July', 'August', 'September', 'October', 'November', 'December']
-# # Load data
-df_jobs = pd.read_csv('job_numbers_23.csv')
-
-# Data preprocessing
-df_2023['Week End'] = pd.to_datetime(df_2023['Week End'], errors='coerce')
-df_2023['Week'] = df_2023['Week End'].dt.day_of_week
-df_2023['Month'] = pd.Categorical(df_2023['Week End'].dt.strftime('%B'), categories=month_order, ordered=True)
-df_2023 = df_2023.sort_values(by='Month')
-
-# Merge DataFrames
-df_jobs['Job Numbers'] = df_jobs['Job Numbers'].astype(str)
-df_projects = df_2023.copy()
-df_projects['Job'] = df_projects['Job'].astype(str)
-projects_23 = pd.merge(df_jobs, df_projects, left_on='Job Numbers', right_on='Job', how='inner').drop_duplicates()
-projects_23['Total Hrs'] = projects_23['Reg Hrs'] + projects_23['OT Hrs']
-
-# Data Aggregation: Group by relevant features and sum Total Hours
-aggregated_projects = projects_23.groupby(
-    ['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Duration of Work (Weeks)']
-).agg({'Total Hrs': 'sum'}).reset_index()
-
-# Cache the model training function
-@st.cache_data
-def train_model(X, y, n_estimators=200, test_size=0.2):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
-    rf_model = RandomForestRegressor(
-        n_estimators=n_estimators,
-        max_depth=None,
-        min_samples_split=5,
-        min_samples_leaf=1,
-        random_state=42
-    )
-    rf_model.fit(X_train, y_train)
-    return rf_model
-
-# Streamlit Predictive Model Tab
-if tabs == 'Predictive Model':
-    st.title("Predict Total Hours")
-    st.sidebar.header("Input Features")
-
-    # Define features and target from aggregated data
-    X = aggregated_projects[['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Duration of Work (Weeks)']]
-    y = aggregated_projects['Total Hrs']
-
-    # Initialize the session state for the model
-    if "rf_model" not in st.session_state:
-        st.session_state["rf_model"] = None
-
-    # Train Model Button
-    if st.button("Train Model"):
-        with st.spinner("Training model..."):
-            st.session_state["rf_model"] = train_model(X, y, n_estimators=100, test_size=0.2)  # Reduced n_estimators
-        st.success("Model trained successfully!")
-
-    # Ensure model is trained before allowing predictions
-    if st.session_state["rf_model"] is not None:
-        # Sliders for numerical inputs
-        area = st.sidebar.slider("Area (Ha)", min_value=50, max_value=500, step=10)
-        num_services = st.sidebar.slider("Number of Services", min_value=5, max_value=10, step=1)
-        num_tender_packages = st.sidebar.slider("Number of Tender Packages", min_value=1, max_value=12, step=1)
-        duration_weeks = st.sidebar.slider("Duration of Work (Weeks)", min_value=10, max_value=200, step=5)
-
-        # Prepare input data for prediction
-        user_input = pd.DataFrame({
-            'Area (Ha)': [area],
-            'Number of Services': [num_services],
-            'Number of tender Packages': [num_tender_packages],
-            'Duration of Work (Weeks)': [duration_weeks]
-        })
-
-        # Predict Button
-        if st.button("Predict"):
-            prediction = st.session_state["rf_model"].predict(user_input)
-            st.write(f"### Predicted Total Hours: {prediction[0]:.2f}")
-    else:
-        st.warning("Please train the model before making predictions.")
-# # Load data
-df_jobs = pd.read_csv('job_numbers_23.csv')
-
-# Data preprocessing
-df_2023['Week End'] = pd.to_datetime(df_2023['Week End'], errors='coerce')
-df_2023['Week'] = df_2023['Week End'].dt.day_of_week
-df_2023['Month'] = pd.Categorical(df_2023['Week End'].dt.strftime('%B'), categories=month_order, ordered=True)
-df_2023 = df_2023.sort_values(by='Month')
-
-# Merge DataFrames
-df_jobs['Job Numbers'] = df_jobs['Job Numbers'].astype(str)
-df_projects = df_2023.copy()
-df_projects['Job'] = df_projects['Job'].astype(str)
-projects_23 = pd.merge(df_jobs, df_projects, left_on='Job Numbers', right_on='Job', how='inner').drop_duplicates()
-projects_23['Total Hrs'] = projects_23['Reg Hrs'] + projects_23['OT Hrs']
-
-# Select relevant columns
-relevant_columns = [
-   'Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers', 'Duration of Work (Weeks)', 'Designation', 'WBS','Total Hrs'
-]
-projects_23 = projects_23[relevant_columns].dropna()
-projects_23['Designation'] = projects_23['Designation'].str.lower()
-
-# Cache encoded label encoders and preprocessing
+# Data Preprocessing Function
 @st.cache_data
 def preprocess_data(data):
     label_encoders = {}
-    for column in ['WBS','Number of tender Packages','Job Numbers','Designation']:
+    for column in ['WBS', 'Number of tender Packages', 'Job Numbers', 'Designation']:
         le = LabelEncoder()
         data[column] = le.fit_transform(data[column].astype(str))
         label_encoders[column] = le
     return data, label_encoders
 
-projects_23, label_encoders = preprocess_data(projects_23)
-
-# Cache the model training function
+# Model Training Function
 @st.cache_data
 def train_model(X, y, n_estimators=200, test_size=0.2):
-    # Split data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
-    # Train Random Forest model
     rf_model = RandomForestRegressor(
         n_estimators=n_estimators,
         max_depth=None,
@@ -478,53 +372,114 @@ def train_model(X, y, n_estimators=200, test_size=0.2):
     rf_model.fit(X_train, y_train)
     return rf_model, X_test, y_test
 
-# Streamlit Predictive Table Tab
-if tabs == 'Predictive Table':
+# Load and preprocess data
+df_jobs = pd.read_csv('job_numbers_23.csv')
+
+df_2023['Week End'] = pd.to_datetime(df_2023['Week End'], errors='coerce')
+df_2023['Week'] = df_2023['Week End'].dt.day_of_week
+df_2023['Month'] = pd.Categorical(df_2023['Week End'].dt.strftime('%B'), categories=month_order, ordered=True)
+df_2023 = df_2023.sort_values(by='Month')
+
+df_jobs['Job Numbers'] = df_jobs['Job Numbers'].astype(str)
+df_projects = df_2023.copy()
+df_projects['Job'] = df_projects['Job'].astype(str)
+projects_23 = pd.merge(df_jobs, df_projects, left_on='Job Numbers', right_on='Job', how='inner').drop_duplicates()
+projects_23['Total Hrs'] = projects_23['Reg Hrs'] + projects_23['OT Hrs']
+
+relevant_columns = [
+    'Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers', 
+    'Duration of Work (Weeks)', 'Designation', 'WBS', 'Total Hrs'
+]
+projects_23 = projects_23[relevant_columns].dropna()
+projects_23['Designation'] = projects_23['Designation'].str.lower()
+projects_23, label_encoders = preprocess_data(projects_23)
+
+# Aggregate Data for Predictive Model Tab
+aggregated_projects = projects_23.groupby(
+    ['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Duration of Work (Weeks)']
+).agg({'Total Hrs': 'sum'}).reset_index()
+
+# Tabs Implementation
+if tabs == 'Predictive Model':
+    st.title("Predict Total Hours (Aggregated)")
+    st.sidebar.header("Input Features")
+
+    # Features and target
+    X = aggregated_projects[['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Duration of Work (Weeks)']]
+    y = aggregated_projects['Total Hrs']
+
+    # Initialize model in session state
+    if "rf_model" not in st.session_state:
+        st.session_state["rf_model"] = None
+
+    # Train Model Button
+    if st.button("Train Model"):
+        with st.spinner("Training model..."):
+            st.session_state["rf_model"], _, _ = train_model(X, y, n_estimators=100, test_size=0.2)
+        st.success("Model trained successfully!")
+
+    # Prediction
+    if st.session_state["rf_model"] is not None:
+        area = st.sidebar.slider("Area (Ha)", min_value=50, max_value=500, step=10)
+        num_services = st.sidebar.slider("Number of Services", min_value=5, max_value=10, step=1)
+        num_tender_packages = st.sidebar.slider("Number of Tender Packages", min_value=1, max_value=12, step=1)
+        duration_weeks = st.sidebar.slider("Duration of Work (Weeks)", min_value=10, max_value=200, step=5)
+
+        user_input = pd.DataFrame({
+            'Area (Ha)': [area],
+            'Number of Services': [num_services],
+            'Number of tender Packages': [num_tender_packages],
+            'Duration of Work (Weeks)': [duration_weeks]
+        })
+
+        if st.button("Predict"):
+            prediction = st.session_state["rf_model"].predict(user_input)
+            st.write(f"### Predicted Total Hours: {prediction[0]:.2f}")
+    else:
+        st.warning("Please train the model before making predictions.")
+
+elif tabs == 'Predictive Table':
     st.title("Predicted Total Hours Table")
 
-    # Define features and target
-    X = projects_23[['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers', 'Duration of Work (Weeks)', 'Designation', 'WBS']]
+    # Features and target
+    X = projects_23[['Area (Ha)', 'Number of Services', 'Number of tender Packages', 
+                     'Job Numbers', 'Duration of Work (Weeks)', 'Designation', 'WBS']]
     y = projects_23['Total Hrs']
 
-    # Train the model and cache results
-    if "rf_model" not in st.session_state:
+    # Train the model
+    if "rf_model_table" not in st.session_state:
         with st.spinner("Training model..."):
-            rf_model, X_test, y_test = train_model(X, y, n_estimators=100, test_size=0.2)
-            st.session_state["rf_model"] = rf_model
+            rf_model_table, X_test, y_test = train_model(X, y, n_estimators=100, test_size=0.2)
+            st.session_state["rf_model_table"] = rf_model_table
             st.session_state["X_test"] = X_test
             st.session_state["y_test"] = y_test
         st.success("Model trained successfully!")
 
-    # Ensure model is trained before generating the table
-    if st.session_state.get("rf_model") is not None:
-        # Get test data and predictions
-        rf_model = st.session_state["rf_model"]
+    # Predictions and tables
+    if st.session_state.get("rf_model_table") is not None:
+        rf_model = st.session_state["rf_model_table"]
         X_test = st.session_state["X_test"]
         y_test = st.session_state["y_test"]
 
-        # Generate predictions
         predictions = rf_model.predict(X_test)
 
-        # Decode categorical columns for readability
         decoded_X_test = X_test.copy()
         for column in ['WBS', 'Number of tender Packages', 'Job Numbers', 'Designation']:
             decoded_X_test[column] = label_encoders[column].inverse_transform(X_test[column])
 
-        # Create the output table
         output_table = decoded_X_test.copy()
-        output_table['Predicted Total Hrs'] = predictions.round(0)  # Round predictions to 0 decimals
+        output_table['Predicted Total Hrs'] = predictions.round(0)
 
-        # Display the table
-        # Format the table for display
-         # Group data by Designation with Predicted Total Hours
         designation_table = output_table.groupby('Designation', as_index=False)['Predicted Total Hrs'].sum().reset_index(drop=True)
-        # Group data by WBS with Predicted Total Hours
+
         filtered_output_table = output_table[output_table['WBS'].apply(lambda x: str(x).isdigit() and int(x) != 0)]
         wps_table = filtered_output_table.groupby('WBS', as_index=False)['Predicted Total Hrs'].sum().reset_index(drop=True)
-        # Display the tables in Streamlit
+
         st.subheader("Predicted Total Hours by Designation")
-        st.dataframe(designation_table.style.format(precision=0))
+        st.dataframe(designation_table.style.format(precision=0), use_container_width=True)
+
         st.subheader("Predicted Total Hours by WBS")
-        st.dataframe(wps_table.style.format(precision=0))
+        st.dataframe(wps_table.style.format(precision=0), use_container_width=True)
     else:
         st.warning("Please wait while the model is trained.")
+
