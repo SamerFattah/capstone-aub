@@ -378,7 +378,7 @@ projects_23['Designation'] = projects_23['Designation'].str.lower()
 @st.cache_data
 def preprocess_data(data):
     label_encoders = {}
-    for column in ['Designation', 'Month', 'Job Numbers']:
+    for column in ['Designation', 'Job Numbers']:
         le = LabelEncoder()
         data[column] = le.fit_transform(data[column].astype(str))
         label_encoders[column] = le
