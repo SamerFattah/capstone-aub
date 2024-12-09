@@ -434,6 +434,7 @@ relevant_columns = [
 ]
 projects_23 = projects_23[relevant_columns].dropna()
 projects_23['Designation'] = projects_23['Designation'].str.lower()
+projects_23['Total Hrs'] = projects_23['Reg Hrs'] + projects_23['OT Hrs']
 
 # Cache encoded label encoders and preprocessing
 @st.cache_data
