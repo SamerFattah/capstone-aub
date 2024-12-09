@@ -377,7 +377,6 @@ df_jobs = pd.read_csv('job_numbers_23.csv')
 
 df_2023['Week End'] = pd.to_datetime(df_2023['Week End'], errors='coerce')
 df_2023['Week'] = df_2023['Week End'].dt.day_of_week
-df_2023['Month'] = pd.Categorical(df_2023['Week End'].dt.strftime('%B'), categories=month_order, ordered=True)
 df_2023 = df_2023.sort_values(by='Month')
 
 df_jobs['Job Numbers'] = df_jobs['Job Numbers'].astype(str)
