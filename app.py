@@ -409,7 +409,7 @@ if tabs == 'Predictive Model':
 
     # Define features and target
     X = projects_23[['Area (Ha)', 'Number of Services', 'Number of tender Packages',
-                     'Duration of Work (Weeks)', 'Designation']]
+                     'Duration of Work (Weeks)']]
     y = projects_23['Total Hrs']
 
     # Initialize the session state for the model
@@ -431,14 +431,14 @@ if tabs == 'Predictive Model':
         duration_weeks = st.sidebar.slider("Duration of Work (Weeks)", min_value=10, max_value=200, step=5)
 
         # Dropdowns for categorical inputs
-        designation_options = label_encoders['Designation'].inverse_transform(range(len(label_encoders['Designation'].classes_)))
+        # designation_options = label_encoders['Designation'].inverse_transform(range(len(label_encoders['Designation'].classes_)))
         # job_number_options = label_encoders['Job Numbers'].inverse_transform(range(len(label_encoders['Job Numbers'].classes_)))
 
         designation = st.sidebar.selectbox("Designation", options=designation_options)
         # job_number = st.sidebar.selectbox("Job Numbers", options=job_number_options)
 
         # Encode user inputs
-        encoded_designation = label_encoders['Designation'].transform([designation])[0]
+        # encoded_designation = label_encoders['Designation'].transform([designation])[0]
         # encoded_job_number = label_encoders['Job Numbers'].transform([job_number])[0]
 
         # Prepare input data for prediction
@@ -446,8 +446,7 @@ if tabs == 'Predictive Model':
             'Area (Ha)': [area],
             'Number of Services': [num_services],
             'Number of tender Packages': [num_tender_packages],
-            'Duration of Work (Weeks)': [duration_weeks],
-            'Designation': [encoded_designation]
+            'Duration of Work (Weeks)': [duration_weeks]
         })
 
         # Predict Button
