@@ -112,70 +112,67 @@ tabs = option_menu(
 # # Component1: Home
 if tabs == "Company Overview":
     def company_overview_tab():
-        # Custom CSS to override default padding and alignment
-        st.markdown(
-            """
-            <style>
-            /* Remove padding/margin from the main block container */
-            .block-container {
-                padding-left: 0rem;
-                padding-right: 0rem;
-            }
-            /* Align the video to the left */
-            .video-container {
-                text-align: left;
-                margin-top: 20px;
-                margin-left: 0px; /* Ensure it starts from the true left */
-            }
-            /* Align the content to the left */
-            .content-container {
-                text-align: left;
-                margin-top: 20px;
-                margin-left: 0px; /* Ensure it starts from the true left */
-                padding: 20px;  /* Optional: Add some padding for better readability */
-                max-width: 100%;  /* Use full width for content */
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
+    # Custom CSS to override default padding and alignment
+      st.markdown(
+        """
+        <style>
+        /* Remove padding/margin from the main block container */
+        .block-container {
+            padding-left: 0rem;
+            padding-right: 0rem;
+        }
+        /* Align the image to the left */
+        .image-container {
+            text-align: left;
+            margin-top: 20px;
+            margin-left: 0px; /* Ensure it starts from the true left */
+        }
+        /* Align the content to the left */
+        .content-container {
+            text-align: left;
+            margin-top: 20px;
+            margin-left: 0px; /* Ensure it starts from the true left */
+            padding: 20px;  /* Optional: Add some padding for better readability */
+            max-width: 100%;  /* Use full width for content */
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        # Video Section
-        st.markdown(
-            """
-            <div class="video-container">
-                <video autoplay muted loop style="width: 100%;">
-                    <source src="https://www.parsons.com/wp-content/uploads/2024/07/Biscayne_A1_pcom_desktop1280x720.mp4" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    # Image Section
+      st.markdown(
+        """
+        <div class="image-container">
+        """,
+        unsafe_allow_html=True,
+    )
+      st.image("engineer.jpg", use_column_width=True, caption="Our Corporation Headquarters")
+      st.markdown("</div>", unsafe_allow_html=True)
 
-        # Content Section
-        st.markdown(
-            """
-            <div class="content-container">
-            <p><br>Our Corporation is an American technology-focused engineering firm specializing in defense, intelligence, security, and critical infrastructure.The company provides advanced technology solutions primarily to government agencies and critical infrastructure clients.</p>
+    # Content Section
+      st.markdown(
+        """
+        <div class="content-container">
+        <p><br>Our Corporation is an American technology-focused engineering firm specializing in defense, intelligence, security, and critical infrastructure. The company provides advanced technology solutions primarily to government agencies and critical infrastructure clients.</p>
 
-            <h2>Company Overview:</h2>
-            <h2>What They Do:</h2>
-            <p>We offer services in several key areas:</p>
-            <ul>
-              <li><strong>Defense and Intelligence:</strong> Cybersecurity solutions, missile defense technologies, space systems, and intelligence support.</li>
-              <li><strong>Critical Infrastructure:</strong> Engineering and managing transportation projects like highways and transit systems, implementing smart city technologies, and providing environmental solutions.</li>
-              <li><strong>Security and Technology:</strong> Protecting critical infrastructure assets, developing biometric identification systems, and offering data analytics, artificial intelligence, and cloud computing services.</li>
-            </ul>
+        <h2>Company Overview:</h2>
+        <h2>What They Do:</h2>
+        <p>We offer services in several key areas:</p>
+        <ul>
+          <li><strong>Defense and Intelligence:</strong> Cybersecurity solutions, missile defense technologies, space systems, and intelligence support.</li>
+          <li><strong>Critical Infrastructure:</strong> Engineering and managing transportation projects like highways and transit systems, implementing smart city technologies, and providing environmental solutions.</li>
+          <li><strong>Security and Technology:</strong> Protecting critical infrastructure assets, developing biometric identification systems, and offering data analytics, artificial intelligence, and cloud computing services.</li>
+        </ul>
 
-            <p>Our mission is to deliver innovative solutions that make the world safer, smarter, and more connected.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        <p>Our mission is to deliver innovative solutions that make the world safer, smarter, and more connected.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    # Call the function in the Company Overview tab
-    company_overview_tab()
+# Call the function in the Company Overview tab
+company_overview_tab()
 if tabs == 'Data Exploration':
       # Data Preprocessing
   df_2023['Week End'] = pd.to_datetime(df_2023['Week End'], errors='coerce')
