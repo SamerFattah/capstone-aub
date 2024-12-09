@@ -157,17 +157,9 @@ if tabs == "Company Overview":
         st.markdown(
             """
             <div class="content-container">
-            <p><br>Our Corporation is an American technology-focused engineering firm specializing in defense, intelligence, security, and critical infrastructure.</br> Founded in 1944 and headquartered in Centreville, Virginia, the company provides advanced technology solutions primarily to government agencies and critical infrastructure clients.</p>
+            <p><br>Our Corporation is an American technology-focused engineering firm specializing in defense, intelligence, security, and critical infrastructure.The company provides advanced technology solutions primarily to government agencies and critical infrastructure clients.</p>
 
             <h2>Company Overview:</h2>
-            <ul>
-              <li><strong>Founded:</strong> 1944</li>
-              <li><strong>Headquarters:</strong> Centreville, Virginia, USA</li>
-              <li><strong>Employees:</strong> ~16,000 (as of 2023)</li>
-              <li><strong>Revenue:</strong> Over $4 billion annually</li>
-              <li><strong>Stock Symbol:</strong> PSN (NYSE)</li>
-            </ul>
-
             <h2>What They Do:</h2>
             <p>We offer services in several key areas:</p>
             <ul>
