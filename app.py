@@ -524,6 +524,6 @@ if tabs == 'Predictive Table':
         st.subheader("Predicted Total Hours by Designation")
         st.table(designation_table.style.format(precision=0))
         st.subheader("Predicted Total Hours by WBS")
-        st.table(wps_table.style.format(precision=0), use_container_width=True)
+        st.table(wps_table.style.format(precision=0))
     else:
         st.warning("Please wait while the model is trained.")
