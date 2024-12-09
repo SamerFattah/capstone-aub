@@ -172,7 +172,7 @@ if tabs == "Company Overview":
     )
 
 # Call the function in the Company Overview tab
-company_overview_tab()
+    company_overview_tab()
 if tabs == 'Data Exploration':
       # Data Preprocessing
   df_2023['Week End'] = pd.to_datetime(df_2023['Week End'], errors='coerce')
