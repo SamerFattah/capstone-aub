@@ -521,8 +521,8 @@ if tabs == 'Predictive Table':
         # Group data by WBS with Predicted Total Hours
         wps_table = output_table.groupby('WBS', as_index=False)['Predicted Total Hrs'].sum().reset_index(drop=True)
         # Display the tables in Streamlit
-        st.dataframe("Predicted Total Hours by Designation")
-        st.table(designation_table.style.format(precision=0))
+        st.subheader("Predicted Total Hours by Designation")
+        st.dataframe(designation_table.style.format(precision=0))
         st.subheader("Predicted Total Hours by WBS")
         st.dataframe(wps_table.style.format(precision=0))
     else:
