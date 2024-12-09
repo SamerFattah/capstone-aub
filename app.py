@@ -369,7 +369,7 @@ projects_23 = pd.merge(df_jobs, df_projects, left_on='Job Numbers', right_on='Jo
 # Select relevant columns
 relevant_columns = [
     'Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers',
-    'Duration of Work (Weeks)', 'Designation', 'Month', 'Reg Hrs'
+    'Duration of Work (Weeks)', 'Designation', 'Reg Hrs'
 ]
 projects_23 = projects_23[relevant_columns].dropna()
 projects_23['Designation'] = projects_23['Designation'].str.lower()
@@ -408,7 +408,7 @@ if tabs == 'Predictive Model':
 
     # Define features and target
     X = projects_23[['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers',
-                     'Duration of Work (Weeks)', 'Designation', 'Month']]
+                     'Duration of Work (Weeks)', 'Designation']]
     y = projects_23['Reg Hrs']
 
     # Initialize the session state for the model
@@ -435,12 +435,10 @@ if tabs == 'Predictive Model':
 
         designation = st.sidebar.selectbox("Designation", options=designation_options)
         job_number = st.sidebar.selectbox("Job Numbers", options=job_number_options)
-        month = st.sidebar.selectbox("Month", options=month_order)
 
         # Encode user inputs
         encoded_designation = label_encoders['Designation'].transform([designation])[0]
         encoded_job_number = label_encoders['Job Numbers'].transform([job_number])[0]
-        encoded_month = month_order.index(month)  # Use predefined order for months
 
         # Prepare input data for prediction
         user_input = pd.DataFrame({
@@ -449,8 +447,7 @@ if tabs == 'Predictive Model':
             'Number of tender Packages': [num_tender_packages],
             'Job Numbers': [encoded_job_number],
             'Duration of Work (Weeks)': [duration_weeks],
-            'Designation': [encoded_designation],
-            'Month': [encoded_month]
+            'Designation': [encoded_designation]
         })
 
         # Predict Button
