@@ -512,10 +512,12 @@ if tabs == 'Predictive Table':
 
         # Create the output table
         output_table = decoded_X_test.copy()
-        output_table['Actual Total Hrs'] = y_test.values
         output_table['Predicted Total Hrs'] = predictions.round(0)  # Round predictions to 0 decimals
 
         # Display the table
-        st.dataframe(output_table)
+        # Format the table for display
+        styled_table = output_table.reset_index(drop=True).style.format(precision=0)  # Remove index and round numbers to 0 decimals
+        # Display the styled table in full width
+        st.dataframe(styled_table, use_container_width=True)
     else:
         st.warning("Please wait while the model is trained.")
