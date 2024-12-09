@@ -147,7 +147,7 @@ if tabs == "Company Overview":
         """,
         unsafe_allow_html=True,
     )
-      st.image("https://github.com/SamerFattah/capstone-aub/blob/main/engineer.jpg", use_column_width=True, caption="Our Corporation Headquarters")
+      st.image("https://github.com/SamerFattah/capstone-aub/blob/main/engineer.jpg")
       st.markdown("</div>", unsafe_allow_html=True)
 
     # Content Section
