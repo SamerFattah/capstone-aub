@@ -83,27 +83,36 @@ tabs = option_menu(
             "padding": "0!important", 
             "background-color": "#EEF4F8",  # Overall menu background color
             "display": "flex",  # Use flexbox for alignment
-            "justify-content": "center",  # Center the menu
+            "justify-content": "space-evenly",  # Add even spacing between items
+            "width": "100%",  # Stretch container to full width
         },
-        "icon": {"color": "white", "font-size": "18px"},  # Icon style
+        "icon": {
+            "color": "black",  # Change icon color for better contrast
+            "font-size": "20px",  # Slightly larger icons
+        },
         "nav": {
             "border": "none",  # Remove lines between menu items
             "background-color": "#EEF4F8",  # Ensure consistency in overall background
         },
-        "nav-item": {"margin": "0px", "padding": "0px"},  # No extra spacing
+        "nav-item": {
+            "margin": "0px 15px",  # Add spacing between items
+            "padding": "0px",  # No extra padding
+        },
         "nav-link": {
             "font-size": "18px",
             "text-align": "center",
-            "margin": "0px",
-            "padding": "8px",  # Adjust padding for better spacing
+            "margin": "5px",
+            "padding": "12px 20px",  # Adjust padding for better spacing
             "background-color": "#FFFFFF",  # Default menu background
-            "border-radius": "4px",  # Optional rounded corners
+            "border-radius": "6px",  # Add rounded corners for better aesthetics
             "color": "black",  # Default text color
+            "box-shadow": "0px 2px 5px rgba(0, 0, 0, 0.1)",  # Add subtle shadow for depth
         },
         "nav-link-selected": {
-            "background-color": "#081D31",  # Keep selected tab white
+            "background-color": "#081D31",  # Highlight active tab
             "color": "white",  # Text color for active tab
-            "font-weight": "bold",  # Optional: Bold text for active tab
+            "font-weight": "bold",  # Make active tab bold
+            "border-radius": "6px",  # Keep rounded corners consistent
         },
     }
 )
