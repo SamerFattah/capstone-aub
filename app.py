@@ -445,7 +445,7 @@ projects_23['Total Hrs'] = projects_23['Reg Hrs'] + projects_23['OT Hrs']
 
 # Select relevant columns
 relevant_columns = [
-   'Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers', 'Duration of Work (Weeks)', 'Designation', 'WBS'
+   'Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers', 'Duration of Work (Weeks)', 'Designation', 'WBS','Total Hrs'
 ]
 projects_23 = projects_23[relevant_columns].dropna()
 projects_23['Designation'] = projects_23['Designation'].str.lower()
