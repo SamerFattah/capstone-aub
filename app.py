@@ -434,7 +434,7 @@ if tabs == 'Predictive Model':
         # designation_options = label_encoders['Designation'].inverse_transform(range(len(label_encoders['Designation'].classes_)))
         # job_number_options = label_encoders['Job Numbers'].inverse_transform(range(len(label_encoders['Job Numbers'].classes_)))
 
-        designation = st.sidebar.selectbox("Designation", options=designation_options)
+        # designation = st.sidebar.selectbox("Designation", options=designation_options)
         # job_number = st.sidebar.selectbox("Job Numbers", options=job_number_options)
 
         # Encode user inputs
