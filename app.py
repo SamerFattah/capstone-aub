@@ -427,6 +427,21 @@ if tabs == 'Predictive Model':
             st.write(f"### Predicted Total Hours: {prediction[0]:.2f}")
     else:
         st.warning("Please train the model before making predictions.")
+# # Load data
+df_jobs = pd.read_csv('job_numbers_23.csv')
+
+# Data preprocessing
+df_2023['Week End'] = pd.to_datetime(df_2023['Week End'], errors='coerce')
+df_2023['Week'] = df_2023['Week End'].dt.day_of_week
+df_2023['Month'] = pd.Categorical(df_2023['Week End'].dt.strftime('%B'), categories=month_order, ordered=True)
+df_2023 = df_2023.sort_values(by='Month')
+
+# Merge DataFrames
+df_jobs['Job Numbers'] = df_jobs['Job Numbers'].astype(str)
+df_projects = df_2023.copy()
+df_projects['Job'] = df_projects['Job'].astype(str)
+projects_23 = pd.merge(df_jobs, df_projects, left_on='Job Numbers', right_on='Job', how='inner').drop_duplicates()
+projects_23['Total Hrs'] = projects_23['Reg Hrs'] + projects_23['OT Hrs']
 
 # Select relevant columns
 relevant_columns = [
