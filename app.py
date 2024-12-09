@@ -517,13 +517,13 @@ if tabs == 'Predictive Table':
         # Display the table
         # Format the table for display
          # Group data by Designation with Predicted Total Hours
-        designation_table = output_table.groupby('Designation', as_index=False)['Predicted Total Hrs'].sum()
+        designation_table = output_table.groupby('Designation', as_index=False)['Predicted Total Hrs'].sum().reset_index(drop=True)
         # Group data by WBS with Predicted Total Hours
-        wps_table = output_table.groupby('WBS', as_index=False)['Predicted Total Hrs'].sum()
+        wps_table = output_table.groupby('WBS', as_index=False)['Predicted Total Hrs'].sum().reset_index(drop=True)
         # Display the tables in Streamlit
-        st.title("Predicted Total Hours by Designation")
+        st.subheader("Predicted Total Hours by Designation")
         st.dataframe(designation_table.style.format(precision=0), use_container_width=True)
-        st.title("Predicted Total Hours by WBS")
+        st.subheader("Predicted Total Hours by WBS")
         st.dataframe(wps_table.style.format(precision=0), use_container_width=True)
     else:
         st.warning("Please wait while the model is trained.")
