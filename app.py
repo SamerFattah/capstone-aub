@@ -147,7 +147,7 @@ if tabs == "Company Overview":
         """,
         unsafe_allow_html=True,
     )
-      st.image("assets/engineer.jpg")
+      st.image("engineer.jpg")
       st.markdown("</div>", unsafe_allow_html=True)
 
     # Content Section
