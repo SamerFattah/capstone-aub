@@ -365,11 +365,12 @@ df_jobs['Job Numbers'] = df_jobs['Job Numbers'].astype(str)
 df_projects = df_2023.copy()
 df_projects['Job'] = df_projects['Job'].astype(str)
 projects_23 = pd.merge(df_jobs, df_projects, left_on='Job Numbers', right_on='Job', how='inner').drop_duplicates()
+projects_23['Total Hrs'] = projects_23['Reg Hrs'] + projects_23['OT Hrs']
 
 # Select relevant columns
 relevant_columns = [
-    'Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers',
-    'Duration of Work (Weeks)', 'Designation', 'Reg Hrs'
+    'Area (Ha)', 'Number of Services', 'Number of tender Packages',
+    'Duration of Work (Weeks)', 'Designation', 'Total Hrs'
 ]
 projects_23 = projects_23[relevant_columns].dropna()
 projects_23['Designation'] = projects_23['Designation'].str.lower()
@@ -378,7 +379,7 @@ projects_23['Designation'] = projects_23['Designation'].str.lower()
 @st.cache_data
 def preprocess_data(data):
     label_encoders = {}
-    for column in ['Designation', 'Job Numbers']:
+    for column in ['Designation']:
         le = LabelEncoder()
         data[column] = le.fit_transform(data[column].astype(str))
         label_encoders[column] = le
@@ -403,13 +404,13 @@ def train_model(X, y, n_estimators=200, test_size=0.2):
 # Streamlit Predictive Model Tab
 # Streamlit Predictive Model Tab
 if tabs == 'Predictive Model':
-    st.title("Predict Regular Hours")
+    st.title("Predict Total Hours")
     st.sidebar.header("Input Features")
 
     # Define features and target
-    X = projects_23[['Area (Ha)', 'Number of Services', 'Number of tender Packages', 'Job Numbers',
+    X = projects_23[['Area (Ha)', 'Number of Services', 'Number of tender Packages',
                      'Duration of Work (Weeks)', 'Designation']]
-    y = projects_23['Reg Hrs']
+    y = projects_23['Total Hrs']
 
     # Initialize the session state for the model
     if "rf_model" not in st.session_state:
@@ -431,21 +432,20 @@ if tabs == 'Predictive Model':
 
         # Dropdowns for categorical inputs
         designation_options = label_encoders['Designation'].inverse_transform(range(len(label_encoders['Designation'].classes_)))
-        job_number_options = label_encoders['Job Numbers'].inverse_transform(range(len(label_encoders['Job Numbers'].classes_)))
+        # job_number_options = label_encoders['Job Numbers'].inverse_transform(range(len(label_encoders['Job Numbers'].classes_)))
 
         designation = st.sidebar.selectbox("Designation", options=designation_options)
-        job_number = st.sidebar.selectbox("Job Numbers", options=job_number_options)
+        # job_number = st.sidebar.selectbox("Job Numbers", options=job_number_options)
 
         # Encode user inputs
         encoded_designation = label_encoders['Designation'].transform([designation])[0]
-        encoded_job_number = label_encoders['Job Numbers'].transform([job_number])[0]
+        # encoded_job_number = label_encoders['Job Numbers'].transform([job_number])[0]
 
         # Prepare input data for prediction
         user_input = pd.DataFrame({
             'Area (Ha)': [area],
             'Number of Services': [num_services],
             'Number of tender Packages': [num_tender_packages],
-            'Job Numbers': [encoded_job_number],
             'Duration of Work (Weeks)': [duration_weeks],
             'Designation': [encoded_designation]
         })
@@ -453,7 +453,7 @@ if tabs == 'Predictive Model':
         # Predict Button
         if st.button("Predict"):
             prediction = st.session_state["rf_model"].predict(user_input)
-            st.write(f"### Predicted Regular Hours: {prediction[0]:.2f}")
+            st.write(f"### Predicted Total Hours: {prediction[0]:.2f}")
     else:
         st.warning("Please train the model before making predictions.")
 
